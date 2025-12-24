@@ -77,6 +77,7 @@
     "lineWidth": 100
   },
   "javascript": {
+    "globals": ["Bun"],
     "formatter": {
       "quoteStyle": "single",
       "trailingCommas": "es5",

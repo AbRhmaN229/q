@@ -10,6 +10,7 @@ import { hideBin } from 'yargs/helpers';
 import type { SDKAssistantMessage, SDKResultMessage } from './lib/agent.js';
 import { query, streamQuery } from './lib/agent.js';
 import { color, semantic, status } from './lib/colors.js';
+import { render as renderMarkdown } from './lib/markdown.js';
 import type { CliArgs, Mode } from './types.js';
 
 const VERSION = '0.1.0';
@@ -63,6 +64,10 @@ function parseArgs(): CliArgs {
       alias: 'q',
       type: 'boolean',
       describe: 'Minimal output (response only)',
+    })
+    .option('raw', {
+      type: 'boolean',
+      describe: 'Raw output without markdown formatting',
     })
     .example('$0 "what does this error mean"', 'Quick query')
     .example('cat error.log | $0 "explain this"', 'Pipe mode')
@@ -280,7 +285,13 @@ async function runQuery(prompt: string, args: CliArgs): Promise<void> {
       }
 
       if (result.success) {
-        console.log(result.response);
+        // Render markdown unless --raw is specified
+        if (args.raw) {
+          console.log(result.response);
+        } else {
+          const rendered = await renderMarkdown(result.response);
+          console.log(rendered);
+        }
 
         if (!quiet) {
           const tokens = formatTokens(result.tokens.input, result.tokens.output);

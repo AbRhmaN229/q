@@ -51,6 +51,9 @@ export interface CliArgs {
   /** Quiet mode - minimal output */
   quiet?: boolean;
 
+  /** Raw output without markdown formatting */
+  raw?: boolean;
+
   /** Show version */
   version?: boolean;
 
