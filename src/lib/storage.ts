@@ -78,6 +78,13 @@ function getDb(): Database {
   db.run('CREATE INDEX IF NOT EXISTS idx_messages_session ON messages(session_id)');
   db.run('CREATE INDEX IF NOT EXISTS idx_sessions_updated ON sessions(updated_at DESC)');
 
+  // Migration: Add sdk_session_id column if it doesn't exist (for existing databases)
+  try {
+    db.run('ALTER TABLE sessions ADD COLUMN sdk_session_id TEXT');
+  } catch {
+    // Column already exists, ignore
+  }
+
   return db;
 }
 

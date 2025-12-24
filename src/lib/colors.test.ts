@@ -104,6 +104,21 @@ describe('status indicators', () => {
     expect(status.active).toContain('●');
     expect(status.active).toContain(colors.purple);
   });
+
+  test('info is cyan info symbol', () => {
+    expect(status.info).toContain('ℹ');
+    expect(status.info).toContain(colors.cyan);
+  });
+
+  test('tool is coral arrow', () => {
+    expect(status.tool).toContain('▸');
+    expect(status.tool).toContain(colors.coral);
+  });
+
+  test('thinking is purple diamond', () => {
+    expect(status.thinking).toContain('◆');
+    expect(status.thinking).toContain(colors.purple);
+  });
 });
 
 describe('box drawing characters', () => {
