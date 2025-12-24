@@ -417,7 +417,9 @@ async function runAgent(task: string, args: CliArgs, _config: Config): Promise<v
   }
 
   let fullText = '';
+  let lastShownText = '';
   let toolCount = 0;
+  let hasShownTools = false;
   const seenTools = new Set<string>();
 
   try {
@@ -434,8 +436,24 @@ async function runAgent(task: string, args: CliArgs, _config: Config): Promise<v
       // Handle tool use
       if (message.type === 'assistant') {
         const assistantMsg = message as SDKAssistantMessage;
+
+        // First pass: show any text that appears before tools (announcement)
         for (const block of assistantMsg.message.content) {
-          // Show tool calls
+          if ('text' in block && block.text) {
+            fullText = block.text;
+            // Show new text incrementally before tools appear
+            if (!hasShownTools && fullText !== lastShownText) {
+              const newText = fullText.slice(lastShownText.length);
+              if (newText && !quiet) {
+                process.stdout.write(newText);
+              }
+              lastShownText = fullText;
+            }
+          }
+        }
+
+        // Second pass: show tool calls
+        for (const block of assistantMsg.message.content) {
           if ('type' in block && block.type === 'tool_use') {
             const toolBlock = block as {
               type: 'tool_use';
@@ -446,16 +464,16 @@ async function runAgent(task: string, args: CliArgs, _config: Config): Promise<v
             const toolKey = `${toolBlock.name}:${JSON.stringify(toolBlock.input)}`;
             if (!seenTools.has(toolKey)) {
               seenTools.add(toolKey);
+              // Add newline before first tool if we showed announcement text
+              if (!hasShownTools && lastShownText && !quiet) {
+                console.log();
+              }
+              hasShownTools = true;
               if (!quiet) {
                 console.log(formatToolCall(toolBlock.name, toolBlock.input));
               }
               toolCount++;
             }
-          }
-
-          // Buffer text (we'll render markdown at the end)
-          if ('text' in block && block.text) {
-            fullText = block.text;
           }
         }
       }
@@ -464,11 +482,19 @@ async function runAgent(task: string, args: CliArgs, _config: Config): Promise<v
       if (message.type === 'result') {
         const result = message as SDKResultMessage;
 
-        // Render the buffered text as markdown
+        // Render the final text as markdown (skip announcement part we already showed)
         if (fullText && !quiet) {
           console.log();
-          const rendered = await renderMarkdown(fullText);
-          console.log(rendered);
+          // If we showed tools, render full markdown response
+          // If no tools, we already streamed the text - just add newline
+          if (hasShownTools) {
+            const rendered = await renderMarkdown(fullText);
+            console.log(rendered);
+          } else if (!lastShownText) {
+            // No streaming happened, render now
+            const rendered = await renderMarkdown(fullText);
+            console.log(rendered);
+          }
         }
 
         if (!quiet) {
