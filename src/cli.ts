@@ -15,6 +15,14 @@ import { color, semantic, status } from './lib/colors.js';
 import { loadQConfig } from './lib/config.js';
 import { render as renderMarkdown } from './lib/markdown.js';
 import { AUTO_APPROVED_TOOLS, INTERACTIVE_TOOLS, SYSTEM_PROMPT } from './lib/prompt.js';
+import {
+  addMessage,
+  createSession,
+  getLastSession,
+  getSession,
+  listSessions,
+  updateSessionStats,
+} from './lib/storage.js';
 import type { CliArgs, Config, Mode } from './types.js';
 
 /** Tools that require explicit user approval */
@@ -55,6 +63,10 @@ function parseArgs(): CliArgs {
       alias: 'r',
       type: 'string',
       describe: 'Resume a previous session (use "last" for most recent)',
+    })
+    .option('sessions', {
+      type: 'boolean',
+      describe: 'List recent sessions',
     })
     .option('model', {
       alias: 'm',
@@ -149,6 +161,50 @@ function formatCost(cost: number): string {
 }
 
 /**
+ * Format relative time
+ */
+function formatRelativeTime(timestamp: number): string {
+  const diff = Date.now() - timestamp;
+  const mins = Math.floor(diff / 60000);
+  const hours = Math.floor(diff / 3600000);
+  const days = Math.floor(diff / 86400000);
+
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins}m ago`;
+  if (hours < 24) return `${hours}h ago`;
+  if (days < 7) return `${days}d ago`;
+  return new Date(timestamp).toLocaleDateString();
+}
+
+/**
+ * Show recent sessions
+ */
+function showSessions(): void {
+  const sessions = listSessions(10);
+
+  if (sessions.length === 0) {
+    console.log(semantic.muted('No sessions yet'));
+    return;
+  }
+
+  console.log();
+  console.log(color('Recent sessions', 'purple', 'bold'));
+  console.log(semantic.muted('─'.repeat(60)));
+
+  for (const s of sessions) {
+    const title = s.title ?? semantic.muted('(untitled)');
+    const time = formatRelativeTime(s.updatedAt);
+    const cost = formatCost(s.totalCost);
+
+    console.log(`  ${color(s.id, 'cyan')} ${title}`);
+    console.log(`    ${semantic.muted(`${s.messageCount} msgs │ ${cost} │ ${s.model} │ ${time}`)}`);
+  }
+
+  console.log();
+  console.log(semantic.muted('Resume with: q -r <id> or q -r last'));
+}
+
+/**
  * Main entry point
  */
 async function main(): Promise<void> {
@@ -167,6 +223,36 @@ async function main(): Promise<void> {
   if (process.env.DEBUG) {
     console.error(semantic.muted(`[debug] mode=${mode} args=${JSON.stringify(args)}`));
     console.error(semantic.muted(`[debug] config=${JSON.stringify(config)}`));
+  }
+
+  // Handle --sessions flag
+  if (args.sessions) {
+    showSessions();
+    return;
+  }
+
+  // Handle --resume flag
+  if (args.resume) {
+    const session = args.resume === 'last' ? getLastSession() : getSession(String(args.resume));
+    if (!session) {
+      console.error(semantic.error('Session not found'));
+      console.log(semantic.muted('Use --sessions to list available sessions'));
+      process.exit(1);
+    }
+    console.log(semantic.info(`Resuming session ${session.id}`));
+    console.log(
+      semantic.muted(`${session.messages.length} messages, ${session.totalTokens} tokens`)
+    );
+    console.log();
+    // Show last few messages for context
+    for (const msg of session.messages.slice(-4)) {
+      const prefix = msg.role === 'user' ? color('›', 'cyan') : color('◆', 'green');
+      console.log(`${prefix} ${msg.content.slice(0, 100)}${msg.content.length > 100 ? '...' : ''}`);
+    }
+    console.log();
+    // TODO: Actually resume the conversation with the SDK
+    console.log(semantic.warning('Resume functionality coming soon'));
+    return;
   }
 
   switch (mode) {
@@ -471,6 +557,11 @@ function formatToolCall(toolName: string, input: Record<string, unknown>): strin
 async function runAgent(task: string, args: CliArgs, _config: Config): Promise<void> {
   const quiet = args.quiet ?? false;
 
+  // Create session and save user message
+  const modelId = (args.model ? MODEL_MAP[args.model] : undefined) ?? 'claude-sonnet-4-20250514';
+  const session = createSession(modelId, process.cwd());
+  addMessage(session.id, 'user', task);
+
   if (!quiet) {
     console.log();
     console.log(color(`${status.active} Agent mode`, 'purple', 'bold'));
@@ -589,6 +680,16 @@ async function runAgent(task: string, args: CliArgs, _config: Config): Promise<v
           }
         }
 
+        // Save assistant response to session
+        const totalTokens = result.usage.input_tokens + result.usage.output_tokens;
+        addMessage(session.id, 'assistant', fullText, totalTokens);
+        updateSessionStats(
+          session.id,
+          totalTokens,
+          result.total_cost_usd,
+          task.slice(0, 50) // Use first 50 chars of task as title
+        );
+
         if (!quiet) {
           const tokens = formatTokens(result.usage.input_tokens, result.usage.output_tokens);
           const cost = formatCost(result.total_cost_usd);
@@ -600,6 +701,7 @@ async function runAgent(task: string, args: CliArgs, _config: Config): Promise<v
               `${status.success} ${tokens} tokens │ ${cost} │ ${args.model ?? 'sonnet'} │ ${result.num_turns} turns │ ${toolCount} tools`
             )
           );
+          console.log(semantic.muted(`session: ${session.id}`));
         }
       }
     }

@@ -42,6 +42,9 @@ export interface CliArgs {
   /** Resume a previous session */
   resume?: string | boolean;
 
+  /** List recent sessions */
+  sessions?: boolean;
+
   /** Model to use */
   model?: 'sonnet' | 'opus' | 'haiku';
 
