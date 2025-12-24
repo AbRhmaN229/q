@@ -10,8 +10,9 @@ import { hideBin } from 'yargs/helpers';
 import type { SDKAssistantMessage, SDKResultMessage } from './lib/agent.js';
 import { query, streamQuery } from './lib/agent.js';
 import { color, semantic, status } from './lib/colors.js';
+import { loadQConfig } from './lib/config.js';
 import { render as renderMarkdown } from './lib/markdown.js';
-import type { CliArgs, Mode } from './types.js';
+import type { CliArgs, Config, Mode } from './types.js';
 
 const VERSION = '0.1.0';
 
@@ -145,12 +146,21 @@ function formatCost(cost: number): string {
  * Main entry point
  */
 async function main(): Promise<void> {
+  // Load config first
+  const config = await loadQConfig();
+
   const args = parseArgs();
   const mode = detectMode(args);
+
+  // Apply config defaults if not specified via CLI
+  if (!args.model && config.model) {
+    args.model = config.model;
+  }
 
   // Show startup info in development
   if (process.env.DEBUG) {
     console.error(semantic.muted(`[debug] mode=${mode} args=${JSON.stringify(args)}`));
+    console.error(semantic.muted(`[debug] config=${JSON.stringify(config)}`));
   }
 
   switch (mode) {
@@ -160,7 +170,7 @@ async function main(): Promise<void> {
         console.error(semantic.error('No query provided'));
         process.exit(1);
       }
-      await runQuery(args.query, args);
+      await runQuery(args.query, args, config);
       break;
     }
 
@@ -169,13 +179,13 @@ async function main(): Promise<void> {
       const stdin = await readStdin();
       const prompt = args.query ?? 'Explain this:';
       const fullPrompt = `<context>\n${stdin.trim()}\n</context>\n\n${prompt}`;
-      await runQuery(fullPrompt, args);
+      await runQuery(fullPrompt, args, config);
       break;
     }
 
     case 'interactive': {
       // Interactive TUI mode
-      await runInteractive(args);
+      await runInteractive(args, config);
       break;
     }
 
@@ -185,7 +195,7 @@ async function main(): Promise<void> {
         console.error(semantic.error('No task provided for execute mode'));
         process.exit(1);
       }
-      await runAgent(args.query, args);
+      await runAgent(args.query, args, config);
       break;
     }
   }
@@ -230,7 +240,7 @@ function buildQueryOptions(
 /**
  * Run a single query with streaming
  */
-async function runQuery(prompt: string, args: CliArgs): Promise<void> {
+async function runQuery(prompt: string, args: CliArgs, _config: Config): Promise<void> {
   const quiet = args.quiet ?? false;
 
   // Show thinking indicator
@@ -335,7 +345,7 @@ async function runQuery(prompt: string, args: CliArgs): Promise<void> {
 /**
  * Run interactive TUI mode
  */
-async function runInteractive(args: CliArgs): Promise<void> {
+async function runInteractive(args: CliArgs, _config: Config): Promise<void> {
   const { render } = await import('ink');
   const React = await import('react');
   const { App } = await import('./components/index.js');
@@ -388,7 +398,7 @@ function formatToolCall(toolName: string, input: Record<string, unknown>): strin
 /**
  * Run agent mode with tools (streaming)
  */
-async function runAgent(task: string, args: CliArgs): Promise<void> {
+async function runAgent(task: string, args: CliArgs, _config: Config): Promise<void> {
   const quiet = args.quiet ?? false;
 
   if (!quiet) {
