@@ -45,6 +45,12 @@ export interface CliArgs {
   /** Model to use */
   model?: 'sonnet' | 'opus' | 'haiku';
 
+  /** Stream response (default: true) */
+  stream?: boolean;
+
+  /** Quiet mode - minimal output */
+  quiet?: boolean;
+
   /** Show version */
   version?: boolean;
 

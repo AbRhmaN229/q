@@ -12,8 +12,8 @@
   ],
   "scripts": {
     "dev": "bun run --watch src/cli.ts",
-    "build": "bun build src/cli.ts --outdir dist --target bun",
-    "build:compile": "bun build src/cli.ts --compile --outfile q",
+    "build": "bun run build.ts",
+    "build:compile": "bun build src/cli.ts --compile --outfile q --external @anthropic-ai/claude-agent-sdk",
     "check": "biome check --write .",
     "lint": "biome lint --write .",
     "format": "biome format --write . && prettier --write \"**/*.{yaml,yml,md}\"",
@@ -48,13 +48,13 @@
     "bun": ">=1.1.0"
   },
   "dependencies": {
-    "@anthropic-ai/claude-code": "^2.0.76",
+    "@anthropic-ai/claude-agent-sdk": "^0.1.76",
+    "cosmiconfig": "^9.0.0",
     "ink": "^6.6.0",
     "ink-spinner": "^5.0.0",
-    "react": "^19.2.3",
     "marked": "^17.0.1",
+    "react": "^19.2.3",
     "shiki": "^3.20.0",
-    "cosmiconfig": "^9.0.0",
     "yargs": "^18.0.0"
   },
   "devDependencies": {

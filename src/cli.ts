@@ -7,10 +7,19 @@
 
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
+import type { SDKAssistantMessage, SDKResultMessage } from './lib/agent.js';
+import { query, streamQuery } from './lib/agent.js';
 import { color, semantic, status } from './lib/colors.js';
 import type { CliArgs, Mode } from './types.js';
 
 const VERSION = '0.1.0';
+
+/** Model aliases */
+const MODEL_MAP: Record<string, string> = {
+  sonnet: 'claude-sonnet-4-20250514',
+  opus: 'claude-opus-4-20250514',
+  haiku: 'claude-haiku-3-5-20241022',
+};
 
 /**
  * Parse CLI arguments
@@ -44,6 +53,17 @@ function parseArgs(): CliArgs {
       choices: ['sonnet', 'opus', 'haiku'] as const,
       describe: 'Model to use',
     })
+    .option('stream', {
+      alias: 's',
+      type: 'boolean',
+      default: true,
+      describe: 'Stream response (disable with --no-stream)',
+    })
+    .option('quiet', {
+      alias: 'q',
+      type: 'boolean',
+      describe: 'Minimal output (response only)',
+    })
     .example('$0 "what does this error mean"', 'Quick query')
     .example('cat error.log | $0 "explain this"', 'Pipe mode')
     .example('$0 -i', 'Interactive mode')
@@ -68,8 +88,8 @@ function detectMode(args: CliArgs): Mode {
     return 'execute';
   }
 
-  // If stdin is not a TTY and we have no query, we're in pipe mode
-  if (!stdinIsTTY && !args.query) {
+  // If stdin is not a TTY, we're in pipe mode (even if we also have a query)
+  if (!stdinIsTTY) {
     return 'pipe';
   }
 
@@ -93,6 +113,25 @@ async function readStdin(): Promise<string> {
   }
 
   return Buffer.concat(chunks).toString('utf-8');
+}
+
+/**
+ * Format token count nicely
+ */
+function formatTokens(input: number, output: number): string {
+  const total = input + output;
+  if (total < 1000) return `${total}`;
+  if (total < 10000) return `${(total / 1000).toFixed(1)}k`;
+  return `${Math.round(total / 1000)}k`;
+}
+
+/**
+ * Format cost nicely
+ */
+function formatCost(cost: number): string {
+  if (cost < 0.01) return `$${cost.toFixed(4)}`;
+  if (cost < 0.1) return `$${cost.toFixed(3)}`;
+  return `$${cost.toFixed(2)}`;
 }
 
 /**
@@ -146,21 +185,130 @@ async function main(): Promise<void> {
 }
 
 /**
- * Run a single query (non-interactive)
+ * Build query options without undefined values
  */
-async function runQuery(prompt: string, _args: CliArgs): Promise<void> {
-  // TODO: Implement with Claude Agent SDK
-  console.log(semantic.muted('Query mode - implementation pending'));
-  console.log(color(`Prompt: ${prompt}`, 'cyan'));
-  console.log();
-  console.log(
-    semantic.warning(
-      'The Claude Agent SDK integration is not yet implemented.\n' +
-        'This is a placeholder that will be replaced with actual streaming responses.'
-    )
-  );
-  console.log();
-  console.log(semantic.muted(`${status.pending} 0 tokens | sonnet`));
+function buildQueryOptions(
+  args: CliArgs,
+  extras: { tools?: string[]; allowedTools?: string[]; includePartialMessages?: boolean } = {}
+) {
+  const opts: Parameters<typeof query>[1] = {};
+
+  if (args.model) {
+    const modelId = MODEL_MAP[args.model];
+    if (modelId) {
+      opts.model = modelId;
+    }
+  }
+  if (extras.tools) {
+    opts.tools = extras.tools;
+  }
+  if (extras.allowedTools) {
+    opts.allowedTools = extras.allowedTools;
+  }
+  if (extras.includePartialMessages !== undefined) {
+    opts.includePartialMessages = extras.includePartialMessages;
+  }
+
+  return opts;
+}
+
+/**
+ * Run a single query with streaming
+ */
+async function runQuery(prompt: string, args: CliArgs): Promise<void> {
+  const quiet = args.quiet ?? false;
+
+  // Show thinking indicator
+  if (!quiet) {
+    process.stdout.write(semantic.muted(`${status.pending} Thinking...`));
+  }
+
+  let startedOutput = false;
+
+  try {
+    if (args.stream) {
+      // Streaming mode - show output as it arrives
+      let lastText = '';
+      const opts = buildQueryOptions(args, { tools: [], includePartialMessages: true });
+
+      for await (const message of streamQuery(prompt, opts)) {
+        // Handle assistant text
+        if (message.type === 'assistant') {
+          const assistantMsg = message as SDKAssistantMessage;
+          for (const block of assistantMsg.message.content) {
+            if ('text' in block && block.text && block.text !== lastText) {
+              if (!startedOutput) {
+                // Clear the "Thinking..." line
+                if (!quiet) {
+                  process.stdout.write('\r\x1b[K');
+                }
+                startedOutput = true;
+              }
+              // Write incremental text
+              const newText = block.text.slice(lastText.length);
+              process.stdout.write(newText);
+              lastText = block.text;
+            }
+          }
+        }
+
+        // Handle result for stats
+        if (message.type === 'result' && !quiet) {
+          const result = message as SDKResultMessage;
+          const tokens = formatTokens(result.usage.input_tokens, result.usage.output_tokens);
+          const cost = formatCost(result.total_cost_usd);
+
+          // Add newline after response, then show stats
+          if (startedOutput) {
+            console.log();
+          }
+          console.log(
+            semantic.muted(
+              `${status.success} ${tokens} tokens | ${cost} | ${args.model ?? 'sonnet'}`
+            )
+          );
+        }
+      }
+    } else {
+      // Non-streaming mode - wait for complete response
+      const opts = buildQueryOptions(args, { tools: [] });
+      const result = await query(prompt, opts);
+
+      // Clear thinking indicator
+      if (!quiet) {
+        process.stdout.write('\r\x1b[K');
+      }
+
+      if (result.success) {
+        console.log(result.response);
+
+        if (!quiet) {
+          const tokens = formatTokens(result.tokens.input, result.tokens.output);
+          const cost = formatCost(result.cost);
+          console.log(
+            semantic.muted(
+              `${status.success} ${tokens} tokens | ${cost} | ${args.model ?? 'sonnet'}`
+            )
+          );
+        }
+      } else {
+        console.error(semantic.error(`Error: ${result.errorType}`));
+        if (result.errors) {
+          for (const err of result.errors) {
+            console.error(semantic.error(`  ${err}`));
+          }
+        }
+        process.exit(1);
+      }
+    }
+  } catch (error) {
+    // Clear thinking indicator
+    process.stdout.write('\r\x1b[K');
+    console.error(
+      semantic.error(`Error: ${error instanceof Error ? error.message : String(error)}`)
+    );
+    process.exit(1);
+  }
 }
 
 /**
@@ -181,17 +329,51 @@ async function runInteractive(_args: CliArgs): Promise<void> {
 /**
  * Run agent mode with tools
  */
-async function runAgent(task: string, _args: CliArgs): Promise<void> {
-  // TODO: Implement with Claude Agent SDK + tool permissions
-  console.log(semantic.muted('Agent mode - implementation pending'));
-  console.log(color(`Task: ${task}`, 'cyan'));
-  console.log();
-  console.log(
-    semantic.warning(
-      'The agent mode is not yet implemented.\n' +
-        'This will enable Read, Glob, Grep, and Bash tools with approval flow.'
-    )
-  );
+async function runAgent(task: string, args: CliArgs): Promise<void> {
+  const quiet = args.quiet ?? false;
+
+  if (!quiet) {
+    console.log(color(`${status.pending} Agent mode: `, 'purple') + task);
+    console.log();
+  }
+
+  try {
+    // Agent mode - enable common tools with approval required
+    const opts = buildQueryOptions(args, {
+      allowedTools: ['Read', 'Glob', 'Grep'],
+    });
+    opts.permissionMode = 'default'; // Require approval for tool use
+
+    const result = await query(task, opts);
+
+    if (result.success) {
+      console.log(result.response);
+
+      if (!quiet) {
+        const tokens = formatTokens(result.tokens.input, result.tokens.output);
+        const cost = formatCost(result.cost);
+        console.log();
+        console.log(
+          semantic.muted(
+            `${status.success} ${tokens} tokens | ${cost} | ${args.model ?? 'sonnet'} | ${result.numTurns} turns`
+          )
+        );
+      }
+    } else {
+      console.error(semantic.error(`Error: ${result.errorType}`));
+      if (result.errors) {
+        for (const err of result.errors) {
+          console.error(semantic.error(`  ${err}`));
+        }
+      }
+      process.exit(1);
+    }
+  } catch (error) {
+    console.error(
+      semantic.error(`Error: ${error instanceof Error ? error.message : String(error)}`)
+    );
+    process.exit(1);
+  }
 }
 
 // Run the CLI
