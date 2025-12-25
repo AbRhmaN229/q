@@ -67,7 +67,9 @@ export async function runQuery(prompt: string, args: CliArgs, _config: Config): 
             console.log();
           }
           console.log(
-            semantic.muted(`${status.success} ${tokens} tokens | ${cost} | ${args.model ?? 'sonnet'}`)
+            semantic.muted(
+              `${status.success} ${tokens} tokens | ${cost} | ${args.model ?? 'sonnet'}`
+            )
           );
         }
       }
@@ -95,7 +97,9 @@ export async function runQuery(prompt: string, args: CliArgs, _config: Config): 
           const tokens = formatTokens(result.tokens.input, result.tokens.output);
           const cost = formatCost(result.cost);
           console.log(
-            semantic.muted(`${status.success} ${tokens} tokens | ${cost} | ${args.model ?? 'sonnet'}`)
+            semantic.muted(
+              `${status.success} ${tokens} tokens | ${cost} | ${args.model ?? 'sonnet'}`
+            )
           );
         }
       } else {
@@ -111,7 +115,9 @@ export async function runQuery(prompt: string, args: CliArgs, _config: Config): 
   } catch (error) {
     // Clear thinking indicator
     process.stdout.write('\r\x1b[K');
-    console.error(semantic.error(`Error: ${error instanceof Error ? error.message : String(error)}`));
+    console.error(
+      semantic.error(`Error: ${error instanceof Error ? error.message : String(error)}`)
+    );
     process.exit(1);
   }
 }

@@ -85,14 +85,30 @@ export const semantic = {
  * Status indicators (computed on access to respect color mode)
  */
 export const status = {
-  get success() { return color('✓', 'green'); },
-  get error() { return color('✗', 'red'); },
-  get warning() { return color('⚠', 'yellow'); },
-  get info() { return color('ℹ', 'cyan'); },
-  get pending() { return color('○', 'muted'); },
-  get active() { return color('●', 'purple'); },
-  get tool() { return color('▸', 'coral'); },
-  get thinking() { return color('◆', 'purple'); },
+  get success() {
+    return color('✓', 'green');
+  },
+  get error() {
+    return color('✗', 'red');
+  },
+  get warning() {
+    return color('⚠', 'yellow');
+  },
+  get info() {
+    return color('ℹ', 'cyan');
+  },
+  get pending() {
+    return color('○', 'muted');
+  },
+  get active() {
+    return color('●', 'purple');
+  },
+  get tool() {
+    return color('▸', 'coral');
+  },
+  get thinking() {
+    return color('◆', 'purple');
+  },
 } as const;
 
 /**

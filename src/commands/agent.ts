@@ -52,7 +52,10 @@ type RiskLevel = 'low' | 'medium' | 'high';
 /**
  * Assess risk level of a tool call
  */
-function assessRisk(toolName: string, input: Record<string, unknown>): { level: RiskLevel; reason?: string } {
+function assessRisk(
+  toolName: string,
+  input: Record<string, unknown>
+): { level: RiskLevel; reason?: string } {
   if (toolName === 'Bash') {
     const cmd = String(input.command ?? '');
 
@@ -126,7 +129,9 @@ async function promptToolApproval(
   }
 
   console.log();
-  console.log(`${status.warning} ${toolDisplay} ${semantic.muted('[')}${riskDisplay}${semantic.muted(']')}`);
+  console.log(
+    `${status.warning} ${toolDisplay} ${semantic.muted('[')}${riskDisplay}${semantic.muted(']')}`
+  );
   if (risk.reason) {
     console.log(`  ${semantic.muted(risk.reason)}`);
   }
@@ -134,9 +139,10 @@ async function promptToolApproval(
   console.log();
 
   // Extra confirmation for high-risk operations
-  const prompt = risk.level === 'high'
-    ? `${color('Careful!', 'red')} Allow? ${color('[y]es', 'green')} / ${color('[n]o', 'red')}: `
-    : `${semantic.muted('Allow?')} ${color('[y]es', 'green')} / ${color('[n]o', 'red')} / ${color('[a]lways', 'yellow')}: `;
+  const prompt =
+    risk.level === 'high'
+      ? `${color('Careful!', 'red')} Allow? ${color('[y]es', 'green')} / ${color('[n]o', 'red')}: `
+      : `${semantic.muted('Allow?')} ${color('[y]es', 'green')} / ${color('[n]o', 'red')} / ${color('[a]lways', 'yellow')}: `;
 
   const rl = readline.createInterface({
     input: process.stdin,
@@ -335,7 +341,9 @@ export async function runAgent(
       }
     }
   } catch (error) {
-    console.error(semantic.error(`Error: ${error instanceof Error ? error.message : String(error)}`));
+    console.error(
+      semantic.error(`Error: ${error instanceof Error ? error.message : String(error)}`)
+    );
     process.exit(1);
   }
 }

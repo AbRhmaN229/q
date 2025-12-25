@@ -1,13 +1,14 @@
 #!/usr/bin/env bun
+
 /**
  * q - The Shell's Quiet Companion
  *
  * Elegant CLI agent for quick queries with Claude.
  */
 
-import * as readline from 'node:readline';
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
+import * as readline from 'node:readline';
 import { fileURLToPath } from 'node:url';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
@@ -26,7 +27,10 @@ const DEFAULT_MAX_INPUT_SIZE = 100000;
 /**
  * Validate input size against configured limits
  */
-function validateInputSize(input: string, maxSize: number): { valid: true } | { valid: false; message: string } {
+function validateInputSize(
+  input: string,
+  maxSize: number
+): { valid: true } | { valid: false; message: string } {
   if (input.length > maxSize) {
     const sizeKB = Math.round(input.length / 1024);
     const maxKB = Math.round(maxSize / 1024);
@@ -242,7 +246,9 @@ async function main(): Promise<void> {
     }
 
     console.log(semantic.info(`Resuming session ${session.id}`));
-    console.log(semantic.muted(`${session.messages.length} messages, ${session.totalTokens} tokens`));
+    console.log(
+      semantic.muted(`${session.messages.length} messages, ${session.totalTokens} tokens`)
+    );
     console.log();
 
     // Show last few messages for context
@@ -291,7 +297,9 @@ async function main(): Promise<void> {
       const validation = validateInputSize(fullPrompt, maxInputSize);
       if (!validation.valid) {
         console.error(semantic.error(validation.message));
-        console.log(semantic.muted('Tip: Reduce input size or increase safety.maxInputSize in config'));
+        console.log(
+          semantic.muted('Tip: Reduce input size or increase safety.maxInputSize in config')
+        );
         process.exit(1);
       }
       await runQuery(fullPrompt, args, config);
