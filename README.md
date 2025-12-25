@@ -4,10 +4,12 @@
 
 **The tiniest Claude Code CLI — ask, pipe, chat**
 
-[![License](https://img.shields.io/badge/License-Apache%202.0-5E81AC?style=for-the-badge&logo=apache&logoColor=white)](https://opensource.org/licenses/Apache-2.0)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Bun](https://img.shields.io/badge/Bun-Runtime-fbf0df?style=for-the-badge&logo=bun&logoColor=black)](https://bun.sh)
+[![npm](https://img.shields.io/npm/v/@hyperb1iss/q?style=for-the-badge&logo=npm&logoColor=white&color=ff6ac1)](https://www.npmjs.com/package/@hyperb1iss/q)
+[![License](https://img.shields.io/badge/License-MIT-e135ff?style=for-the-badge&logo=opensourceinitiative&logoColor=white)](https://opensource.org/licenses/MIT)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-80ffea?style=for-the-badge&logo=typescript&logoColor=black)](https://www.typescriptlang.org/)
+[![Bun](https://img.shields.io/badge/Bun-Runtime-f1fa8c?style=for-the-badge&logo=bun&logoColor=black)](https://bun.sh)
 [![Claude](https://img.shields.io/badge/Claude-Agent_SDK-e135ff?style=for-the-badge&logo=anthropic&logoColor=white)](https://github.com/anthropics/claude-code)
+[![ko-fi](https://img.shields.io/badge/Ko--fi-Support-ff6ac1?style=for-the-badge&logo=ko-fi&logoColor=white)](https://ko-fi.com/hyperb1iss)
 
 ✨ _One letter. No ceremony. Just ask._ ✨
 
@@ -229,13 +231,11 @@ bun run check
 
 ## ⚖️ License
 
-Apache-2.0
+MIT
 
 ---
 
 <div align="center">
-
-Built with the [Claude Agent SDK](https://github.com/anthropics/claude-code)
 
 Created by [Stefanie Jane 🌠](https://github.com/hyperb1iss)
 
