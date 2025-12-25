@@ -1,39 +1,24 @@
-<h1 align="center">
-  <br>
-  🔮 q
-  <br>
-</h1>
+<div align="center">
 
-<p align="center">
-  <strong>just ask</strong>
-</p>
+# q
 
-<p align="center">
-  <a href="#-quick-start">
-    <img src="https://img.shields.io/badge/Quick_Start-Get_Running-e135ff?style=for-the-badge" alt="Quick Start">
-  </a>
-  <a href="#-modes">
-    <img src="https://img.shields.io/badge/Modes-Query_Pipe_Agent-80ffea?style=for-the-badge" alt="Modes">
-  </a>
-  <a href="#-configuration">
-    <img src="https://img.shields.io/badge/Config-Customize-ff6ac1?style=for-the-badge" alt="Configuration">
-  </a>
-</p>
+**The tiniest Claude Code CLI — ask, pipe, chat**
 
-<p align="center">
-  <a href="#-quick-start">Quick Start</a> •
-  <a href="#-modes">Modes</a> •
-  <a href="#-shell-integration">Shell Integration</a> •
-  <a href="#-configuration">Configuration</a> •
-  <a href="#-sessions">Sessions</a>
-</p>
+[![License](https://img.shields.io/badge/License-Apache%202.0-5E81AC?style=for-the-badge&logo=apache&logoColor=white)](https://opensource.org/licenses/Apache-2.0)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Bun](https://img.shields.io/badge/Bun-Runtime-fbf0df?style=for-the-badge&logo=bun&logoColor=black)](https://bun.sh)
+[![Claude](https://img.shields.io/badge/Claude-Agent_SDK-e135ff?style=for-the-badge&logo=anthropic&logoColor=white)](https://github.com/anthropics/claude-code)
+
+✨ _One letter. No ceremony. Just ask._ ✨
+
+[Quick Start](#-quick-start) • [Modes](#-modes) • [Shell Integration](#-shell-integration) •
+[Configuration](#-configuration) • [Sessions](#-sessions)
+
+</div>
 
 ---
 
-> Claude for people who live in the terminal.
-
-**q** is a minimal, elegant CLI for Claude. One letter. No ceremony. Just ask your question and get
-back to work.
+**q** is a minimal, elegant CLI for Claude. Ask your question, get back to work.
 
 ## ⚡ Quick Start
 
@@ -59,7 +44,7 @@ That's it. You're running.
 | **Interactive** | `q -i`                    | TUI chat with full context             |
 | **Agent**       | `q -x "task"`             | Execute with tools (read, write, bash) |
 
-### Query Mode
+### 💬 Query Mode
 
 The default. Ask a question, get an answer.
 
@@ -69,7 +54,7 @@ q "write a regex to match email addresses"
 q "explain this error" < error.log
 ```
 
-### Pipe Mode
+### 🔀 Pipe Mode
 
 Pipe anything to q for analysis.
 
@@ -84,7 +69,7 @@ cat src/lib/storage.ts | q "explain this"
 git diff | q "summarize these changes"
 ```
 
-### Interactive Mode
+### 🖥️ Interactive Mode
 
 Full TUI for back-and-forth conversations.
 
@@ -94,7 +79,7 @@ q -r last               # Resume last session
 q -r abc123             # Resume specific session
 ```
 
-### Agent Mode
+### 🤖 Agent Mode
 
 Let Claude execute tools to complete tasks.
 
@@ -143,7 +128,7 @@ $ q!!
 # Automatically includes the failed command and error output
 ```
 
-## 🔮 Configuration
+## ⚙️ Configuration
 
 Create `q.config.ts` in your project or `~/.config/q/`:
 
@@ -203,7 +188,8 @@ q -x, --execute        Agent mode with tools
 q -r, --resume <id>    Resume session (or "last")
 q -m, --model <model>  Model: sonnet, opus, haiku
 q -s, --stream         Stream output (default: true)
-q -q, --quiet          Response only, no stats
+q -v, --verbose        Show token/cost stats
+q -q, --quiet          Response only, no formatting
 q --raw                No markdown formatting
 q --color <mode>       Color: auto, always, never
 q --sessions           List recent sessions
@@ -226,7 +212,7 @@ NO_COLOR=1 q "question"        # Same effect
 bun install
 
 # Run in development
-bun run src/cli.ts "test query"
+bun run dev
 
 # Build
 bun run build
@@ -236,23 +222,23 @@ bun test
 
 # Type check
 bun run typecheck
+
+# Lint & format
+bun run check
 ```
 
-## 📄 License
+## ⚖️ License
 
 Apache-2.0
 
 ---
 
-<p align="center">
-  Built with the <a href="https://github.com/anthropics/claude-code">Claude Agent SDK</a>
-</p>
+<div align="center">
 
-<p align="center">
-  <a href="https://github.com/hyperb1iss">
-    <img src="https://img.shields.io/badge/GitHub-hyperb1iss-181717?style=for-the-badge&logo=github" alt="GitHub">
-  </a>
-  <a href="https://hyperbliss.tech">
-    <img src="https://img.shields.io/badge/Web-hyperbliss.tech-e135ff?style=for-the-badge" alt="Website">
-  </a>
-</p>
+Built with the [Claude Agent SDK](https://github.com/anthropics/claude-code)
+
+Created by [Stefanie Jane 🌠](https://github.com/hyperb1iss)
+
+If you find q useful, [buy me a Monster Ultra Violet](https://ko-fi.com/hyperb1iss)! ⚡️
+
+</div>
