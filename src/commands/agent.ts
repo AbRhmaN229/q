@@ -325,7 +325,8 @@ export async function runAgent(
           task.slice(0, 50) // Use first 50 chars of task as title
         );
 
-        if (!quiet) {
+        // Only show stats with --verbose
+        if (args.verbose) {
           const tokens = formatTokens(result.usage.input_tokens, result.usage.output_tokens);
           const cost = formatCost(result.total_cost_usd);
 

@@ -68,11 +68,9 @@ function needsHighlighting(lang: string): lang is SupportedLang {
  */
 function renderCodeBlockSimple(code: string, lang: string): string {
   const lines = code.split('\n');
-  const langLabel = lang ? ` ${colors.cyan}${lang}${colors.reset}` : '';
-  const header = `${colors.muted}┌${langLabel}${'─'.repeat(Math.max(0, 77 - lang.length))}┐${colors.reset}`;
-  const boxBottom = `${colors.muted}└${'─'.repeat(78)}┘${colors.reset}`;
-  const content = lines.map(line => `${colors.muted}│${colors.reset} ${line}`).join('\n');
-  return `${header}\n${content}\n${boxBottom}`;
+  const langLabel = lang ? `${colors.muted}─── ${colors.cyan}${lang}${colors.reset}` : '';
+  const content = lines.map(line => `  ${colors.coral}${line}${colors.reset}`).join('\n');
+  return `${langLabel}\n${content}`;
 }
 
 /**
@@ -96,14 +94,12 @@ async function renderCodeBlock(code: string, lang: string): Promise<string> {
   // Convert HTML to ANSI
   const ansi = htmlToAnsi(highlighted);
 
-  // Add box around code
+  // Simple format with language label
   const lines = ansi.split('\n');
-  const boxBottom = `${colors.muted}└${'─'.repeat(78)}┘${colors.reset}`;
-  const langLabel = lang ? ` ${colors.cyan}${lang}${colors.reset}` : '';
-  const header = `${colors.muted}┌${langLabel}${'─'.repeat(Math.max(0, 77 - lang.length))}┐${colors.reset}`;
-  const content = lines.map(line => `${colors.muted}│${colors.reset} ${line}`).join('\n');
+  const langLabel = lang ? `${colors.muted}─── ${colors.cyan}${lang}${colors.reset}` : '';
+  const content = lines.map(line => `  ${line}`).join('\n');
 
-  return `${header}\n${content}\n${boxBottom}`;
+  return `${langLabel}\n${content}`;
 }
 
 /**
@@ -146,9 +142,8 @@ function renderInline(text: string): string {
       // Bold
       .replace(/\*\*(.+?)\*\*/g, `${colors.bold}$1${colors.reset}`)
       .replace(/__(.+?)__/g, `${colors.bold}$1${colors.reset}`)
-      // Italic
-      .replace(/\*(.+?)\*/g, `${colors.dim}$1${colors.reset}`)
-      .replace(/_(.+?)_/g, `${colors.dim}$1${colors.reset}`)
+      // Italic (asterisks only - underscores conflict with filenames)
+      .replace(/(?<!\*)\*([^*]+)\*(?!\*)/g, `${colors.dim}$1${colors.reset}`)
       // Inline code
       .replace(/`([^`]+)`/g, `${colors.coral}$1${colors.reset}`)
       // Links (show URL in parens)
@@ -156,6 +151,8 @@ function renderInline(text: string): string {
         /\[([^\]]+)\]\(([^)]+)\)/g,
         `${colors.cyan}$1${colors.reset} ${colors.muted}($2)${colors.reset}`
       )
+      // Remove escape backslashes (from preprocessing)
+      .replace(/\\_/g, '_')
   );
 }
 
@@ -272,11 +269,21 @@ async function renderTokens(tokens: Token[]): Promise<string> {
  */
 export async function render(markdown: string): Promise<string> {
   const marked = new Marked();
-  const tokens = marked.lexer(markdown);
+  const preprocessed = escapeFilenameUnderscores(markdown);
+  const tokens = marked.lexer(preprocessed);
   const rendered = await renderTokens(tokens);
 
   // Clean up extra newlines
   return rendered.replace(/\n{3,}/g, '\n\n').trim();
+}
+
+/**
+ * Escape underscores in filenames to prevent markdown italic parsing
+ * Matches patterns like word_word (common in filenames)
+ */
+function escapeFilenameUnderscores(text: string): string {
+  // Escape underscores between word characters (filenames like UX_AUDIT_REPORT.md)
+  return text.replace(/(\w)_(\w)/g, '$1\\_$2');
 }
 
 /**
@@ -285,7 +292,8 @@ export async function render(markdown: string): Promise<string> {
  */
 export function renderSync(markdown: string): string {
   const marked = new Marked();
-  const tokens = marked.lexer(markdown);
+  const preprocessed = escapeFilenameUnderscores(markdown);
+  const tokens = marked.lexer(preprocessed);
 
   const renderTokenSync = (token: Token): string => {
     switch (token.type) {
@@ -307,10 +315,9 @@ export function renderSync(markdown: string): string {
         const t = token as Tokens.Code;
         const lines = t.text.split('\n');
         const lang = t.lang ?? '';
-        const header = `${colors.muted}┌ ${colors.cyan}${lang}${colors.muted}${'─'.repeat(Math.max(0, 76 - lang.length))}┐${colors.reset}`;
-        const bottom = `${colors.muted}└${'─'.repeat(78)}┘${colors.reset}`;
-        const content = lines.map(line => `${colors.muted}│${colors.reset} ${line}`).join('\n');
-        return `${header}\n${content}\n${bottom}\n`;
+        const langLabel = lang ? `${colors.muted}─── ${colors.cyan}${lang}${colors.reset}` : '';
+        const content = lines.map(line => `  ${colors.coral}${line}${colors.reset}`).join('\n');
+        return `${langLabel}\n${content}\n`;
       }
       case 'list': {
         const t = token as Tokens.List;

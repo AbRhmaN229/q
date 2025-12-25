@@ -2,7 +2,7 @@
  * Formatting utilities for CLI output
  */
 
-import { color, semantic, status } from './colors.js';
+import { color, semantic } from './colors.js';
 
 /**
  * Format token count nicely
@@ -39,35 +39,56 @@ export function formatRelativeTime(timestamp: number): string {
   return new Date(timestamp).toLocaleDateString();
 }
 
+/** Tool icons for pretty output - stylish unicode symbols */
+const TOOL_ICONS: Record<string, string> = {
+  Read: '◈',
+  Glob: '◇',
+  Grep: '◆',
+  Bash: '▶',
+  Write: '◁',
+  Edit: '◂',
+  MultiEdit: '◂',
+  Task: '●',
+  WebFetch: '◎',
+  WebSearch: '◎',
+};
+
 /**
  * Format a tool call for display
  */
 export function formatToolCall(toolName: string, input: Record<string, unknown>): string {
+  const icon = TOOL_ICONS[toolName] ?? '▸';
   const toolColor = color(toolName, 'coral', 'bold');
 
   let inputSummary = '';
   switch (toolName) {
     case 'Read':
-      inputSummary = input.file_path as string;
+      inputSummary = color(input.file_path as string, 'cyan');
       break;
     case 'Glob':
-      inputSummary = `${input.pattern}${input.path ? ` in ${input.path}` : ''}`;
+      inputSummary = `${color(String(input.pattern), 'yellow')}${input.path ? ` in ${color(String(input.path), 'cyan')}` : ''}`;
       break;
     case 'Grep':
-      inputSummary = `"${input.pattern}"${input.path ? ` in ${input.path}` : ''}`;
+      inputSummary = `${color(`"${input.pattern}"`, 'yellow')}${input.path ? ` in ${color(String(input.path), 'cyan')}` : ''}`;
       break;
     case 'Bash':
-      inputSummary =
+      inputSummary = color(
         (input.command as string).slice(0, 60) +
-        ((input.command as string).length > 60 ? '...' : '');
+          ((input.command as string).length > 60 ? '...' : ''),
+        'cyan'
+      );
       break;
     case 'Write':
     case 'Edit':
-      inputSummary = input.file_path as string;
+    case 'MultiEdit':
+      inputSummary = color(input.file_path as string, 'cyan');
+      break;
+    case 'Task':
+      inputSummary = color(String(input.description ?? input.prompt ?? '').slice(0, 50), 'purple');
       break;
     default:
-      inputSummary = JSON.stringify(input).slice(0, 60);
+      inputSummary = semantic.muted(JSON.stringify(input).slice(0, 60));
   }
 
-  return `  ${status.tool} ${toolColor} ${semantic.muted(inputSummary)}`;
+  return `  ${icon} ${toolColor} ${inputSummary}`;
 }

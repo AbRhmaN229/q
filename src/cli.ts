@@ -90,6 +90,11 @@ function parseArgs(): CliArgs {
       type: 'boolean',
       describe: 'Minimal output (response only)',
     })
+    .option('verbose', {
+      alias: 'v',
+      type: 'boolean',
+      describe: 'Show token/cost stats',
+    })
     .option('raw', {
       type: 'boolean',
       describe: 'Raw output without markdown formatting',

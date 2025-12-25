@@ -21,5 +21,13 @@ export async function runInteractive(args: CliArgs, _config: Config): Promise<vo
     }
   }
 
-  render(React.createElement(App, props));
+  // Clear screen and enter alternate screen buffer for clean TUI
+  process.stdout.write('\x1b[?1049h\x1b[H');
+
+  const instance = render(React.createElement(App, props));
+
+  // Restore main screen buffer on exit
+  instance.waitUntilExit().then(() => {
+    process.stdout.write('\x1b[?1049l');
+  });
 }

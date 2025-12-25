@@ -2,7 +2,7 @@
  * Simple query command (non-agent mode)
  */
 
-import type { SDKAssistantMessage, SDKResultMessage } from '../lib/agent.js';
+import type { SDKResultMessage } from '../lib/agent.js';
 import { query, streamQuery } from '../lib/agent.js';
 import { semantic, status } from '../lib/colors.js';
 import { formatCost, formatTokens } from '../lib/format.js';
@@ -22,55 +22,56 @@ export async function runQuery(prompt: string, args: CliArgs, _config: Config): 
     process.stdout.write(semantic.muted(`${status.pending} Thinking...`));
   }
 
-  let startedOutput = false;
-
   try {
     if (args.stream) {
-      // Streaming mode - show output as it arrives
-      let lastText = '';
+      // Streaming mode - use SDK's clean result.result field
       const systemPrompt = buildSystemPrompt(await getEnvironmentContext());
       const opts = buildQueryOptions(args, {
         systemPrompt,
         tools: [],
-        includePartialMessages: true,
+        includePartialMessages: false, // Don't need partial messages, just final result
       });
 
       for await (const message of streamQuery(prompt, opts)) {
-        // Handle assistant text
-        if (message.type === 'assistant') {
-          const assistantMsg = message as SDKAssistantMessage;
-          for (const block of assistantMsg.message.content) {
-            if ('text' in block && block.text && block.text !== lastText) {
-              if (!startedOutput) {
-                // Clear the "Thinking..." line
-                if (!quiet) {
-                  process.stdout.write('\r\x1b[K');
-                }
-                startedOutput = true;
-              }
-              // Write incremental text
-              const newText = block.text.slice(lastText.length);
-              process.stdout.write(newText);
-              lastText = block.text;
-            }
-          }
-        }
-
-        // Handle result for stats
-        if (message.type === 'result' && !quiet) {
+        // Handle result - SDK provides clean response in result.result
+        if (message.type === 'result') {
           const result = message as SDKResultMessage;
-          const tokens = formatTokens(result.usage.input_tokens, result.usage.output_tokens);
-          const cost = formatCost(result.total_cost_usd);
 
-          // Add newline after response, then show stats
-          if (startedOutput) {
-            console.log();
+          // Clear thinking indicator
+          if (!quiet) {
+            process.stdout.write('\r\x1b[K');
           }
-          console.log(
-            semantic.muted(
-              `${status.success} ${tokens} tokens | ${cost} | ${args.model ?? 'sonnet'}`
-            )
-          );
+
+          // Get response and filter out XML tool blocks
+          const rawText =
+            result.subtype === 'success' && 'result' in result
+              ? (result as { result: string }).result
+              : '';
+
+          // Filter out XML tool calls that leak through
+          const responseText = rawText
+            .replace(/<function_calls>[\s\S]*?<\/function_calls>/g, '')
+            .replace(/\n{3,}/g, '\n\n')
+            .trim();
+
+          // Render markdown unless --raw
+          if (args.raw) {
+            console.log(responseText);
+          } else {
+            const rendered = await renderMarkdown(responseText);
+            console.log(rendered);
+          }
+
+          // Only show stats with --verbose
+          if (args.verbose) {
+            const tokens = formatTokens(result.usage.input_tokens, result.usage.output_tokens);
+            const cost = formatCost(result.total_cost_usd);
+            console.log(
+              semantic.muted(
+                `${status.success} ${tokens} tokens | ${cost} | ${args.model ?? 'sonnet'}`
+              )
+            );
+          }
         }
       }
     } else {
@@ -93,7 +94,8 @@ export async function runQuery(prompt: string, args: CliArgs, _config: Config): 
           console.log(rendered);
         }
 
-        if (!quiet) {
+        // Only show stats with --verbose
+        if (args.verbose) {
           const tokens = formatTokens(result.tokens.input, result.tokens.output);
           const cost = formatCost(result.cost);
           console.log(

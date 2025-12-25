@@ -14,6 +14,7 @@
     "dev": "bun run --watch src/cli.ts",
     "build": "bun run build.ts",
     "build:compile": "bun run build.ts --compile",
+    "link": "bun run build && mkdir -p ~/.local/bin && ln -sf \"$(pwd)/dist/cli.js\" ~/.local/bin/q && echo '✓ Linked q → ~/.local/bin/q'",
     "check": "bun run typecheck && bun run lint:all && bun test",
     "lint": "biome lint .",
     "lint:fix": "biome lint --write .",

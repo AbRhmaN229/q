@@ -54,6 +54,9 @@ export interface CliArgs {
   /** Quiet mode - minimal output */
   quiet?: boolean;
 
+  /** Verbose mode - show tokens/cost stats */
+  verbose?: boolean;
+
   /** Raw output without markdown formatting */
   raw?: boolean;
 

@@ -103,7 +103,7 @@ describe('renderSync', () => {
       const result = renderSync('```javascript\nconst x = 1;\n```');
       expect(result).toContain('const x = 1');
       expect(result).toContain('javascript');
-      expect(result).toContain('┌'); // box
+      expect(result).toContain('───'); // language label prefix
     });
 
     test('renders code blocks without language', () => {

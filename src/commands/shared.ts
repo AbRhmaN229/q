@@ -6,11 +6,11 @@ import type { PermissionResult } from '@anthropic-ai/claude-agent-sdk';
 import type { query } from '../lib/agent.js';
 import type { CliArgs } from '../types.js';
 
-/** Model aliases */
+/** Model aliases - Claude 4.5 latest */
 export const MODEL_MAP: Record<string, string> = {
-  sonnet: 'claude-sonnet-4-20250514',
-  opus: 'claude-opus-4-20250514',
-  haiku: 'claude-haiku-3-5-20241022',
+  sonnet: 'claude-sonnet-4-5-20250929',
+  opus: 'claude-opus-4-5-20251101',
+  haiku: 'claude-haiku-4-5-20251001',
 };
 
 /** Tools that require explicit user approval */

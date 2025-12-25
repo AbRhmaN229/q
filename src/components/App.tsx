@@ -242,11 +242,11 @@ export function App({ initialPrompt, model }: AppProps) {
 
   // Render help overlay if active
   if (showHelp) {
-    return <HelpOverlay width={terminalWidth} height={terminalHeight} />;
+    return <HelpOverlay width={terminalWidth} height={terminalHeight - 1} />;
   }
 
   return (
-    <Box flexDirection="column" height={terminalHeight}>
+    <Box flexDirection="column" height={terminalHeight - 2}>
       {/* Header */}
       <Box paddingX={1} borderStyle="round" borderColor="magenta">
         <Text color="magenta" bold>
@@ -306,12 +306,12 @@ export function App({ initialPrompt, model }: AppProps) {
         )}
 
         {/* Loading indicator */}
-        {isLoading && !streamingText && toolCalls.length === 0 && (
+        {isLoading && !streamingText && (
           <Box marginTop={1}>
             <Text color="magenta">
               <Spinner type="dots" />
             </Text>
-            <Text color="gray"> thinking...</Text>
+            <Text color="gray">{toolCalls.length > 0 ? ' working...' : ' thinking...'}</Text>
           </Box>
         )}
       </Box>
