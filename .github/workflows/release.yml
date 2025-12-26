@@ -21,6 +21,11 @@ on:
         required: false
         type: boolean
         default: false
+      skip_changelog:
+        description: 'Skip changelog generation'
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -68,8 +73,14 @@ jobs:
       - name: '△ Determine version'
         id: version
         run: |
-          CURRENT=$(node -p "require('./package.json').version")
-          echo "Current version: $CURRENT"
+          # Get current version from latest tag (for changelog from reference)
+          CURRENT_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          if [[ -n "$CURRENT_TAG" ]]; then
+            CURRENT="${CURRENT_TAG#v}"
+          else
+            CURRENT=$(node -p "require('./package.json').version")
+          fi
+          echo "Current version: $CURRENT (from tag: ${CURRENT_TAG:-none})"
 
           if [[ -n "${{ inputs.version }}" ]]; then
             VERSION="${{ inputs.version }}"
@@ -92,8 +103,9 @@ jobs:
             exit 1
           fi
 
+          echo "current=$CURRENT" >> $GITHUB_OUTPUT
           echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "Releasing version: $VERSION"
+          echo "Releasing: $CURRENT → $VERSION"
 
       - name: '△ Update version → ${{ steps.version.outputs.version }}'
         run: npm version ${{ steps.version.outputs.version }} --no-git-tag-version
@@ -113,10 +125,40 @@ jobs:
       - name: '● Run tests'
         run: bun test
 
+      - name: '◈ Generate changelog'
+        if: ${{ !inputs.skip_changelog && !inputs.dry_run }}
+        uses: hyperb1iss/git-iris@a6381c844ef92d7e3333913367dca575387d6f36
+        with:
+          command: changelog
+          from: v${{ steps.version.outputs.current }}
+          to: HEAD
+          version-name: ${{ steps.version.outputs.version }}
+          output-file: CHANGELOG.md
+          update-file: 'true'
+          provider: anthropic
+          model: claude-sonnet-4-5-20250929
+          api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+          build-from-source: 'true'
+
+      - name: '◈ Generate release notes'
+        if: ${{ !inputs.dry_run }}
+        id: release_notes
+        uses: hyperb1iss/git-iris@a6381c844ef92d7e3333913367dca575387d6f36
+        with:
+          command: release-notes
+          from: v${{ steps.version.outputs.current }}
+          to: HEAD
+          version-name: ${{ steps.version.outputs.version }}
+          provider: anthropic
+          model: claude-sonnet-4-5-20250929
+          api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+          build-from-source: 'true'
+
       - name: '◆ Commit version bump'
         if: ${{ !inputs.dry_run }}
         run: |
           git add package.json
+          git add CHANGELOG.md 2>/dev/null || true
           git commit -m "🔖 v${{ steps.version.outputs.version }}"
 
       - name: '◆ Create and push tag'
@@ -135,7 +177,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.version.outputs.version }}
-          generate_release_notes: true
+          body: ${{ steps.release_notes.outputs.content }}
 
       - name: '► Summary'
         run: |
@@ -144,8 +186,15 @@ jobs:
           if [[ "${{ inputs.dry_run }}" == "true" ]]; then
             echo "✓ Build and tests passed. Ready to release." >> $GITHUB_STEP_SUMMARY
           else
-            echo "✓ Successfully released" >> $GITHUB_STEP_SUMMARY
+            echo "✓ Successfully released: ${{ steps.version.outputs.current }} → ${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "- [npm](https://www.npmjs.com/package/@hyperb1iss/q/v/${{ steps.version.outputs.version }})" >> $GITHUB_STEP_SUMMARY
             echo "- [GitHub Release](https://github.com/${{ github.repository }}/releases/tag/v${{ steps.version.outputs.version }})" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "---" >> $GITHUB_STEP_SUMMARY
+            echo "### 📝 Release Notes" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            cat << 'EOF' >> $GITHUB_STEP_SUMMARY
+          ${{ steps.release_notes.outputs.content }}
+          EOF
           fi
