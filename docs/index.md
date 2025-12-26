@@ -3,8 +3,8 @@ layout: home
 
 hero:
   name: q
-  text: The Shell's Quiet Companion
-  tagline: Elegant CLI agent for quick queries with Claude
+  text: The Tiniest Claude Code CLI
+  tagline: One letter. Infinite answers.
   actions:
     - theme: brand
       text: Get Started

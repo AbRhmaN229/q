@@ -125,7 +125,8 @@ Use these flags for quieter output:
 
 ### Output Truncated in Pipes
 
-When piping output, q automatically enables quiet and raw mode. If you need different behavior, be explicit:
+When piping output, q automatically enables quiet and raw mode. If you need different behavior, be
+explicit:
 
 ```bash
 q --no-quiet "your query" | other-command

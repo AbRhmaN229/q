@@ -11,7 +11,7 @@
 [![Claude](https://img.shields.io/badge/Claude-Agent_SDK-e135ff?style=for-the-badge&logo=anthropic&logoColor=white)](https://github.com/anthropics/claude-code)
 [![ko-fi](https://img.shields.io/badge/Ko--fi-Support-ff6ac1?style=for-the-badge&logo=ko-fi&logoColor=white)](https://ko-fi.com/hyperb1iss)
 
-✨ _One letter. No ceremony. Just ask._ ✨
+❯ _One letter. Infinite answers._ ❮
 
 [Quick Start](#-quick-start) • [Modes](#-modes) • [Shell Integration](#-shell-integration) •
 [Configuration](#-configuration) • [Sessions](#-sessions)

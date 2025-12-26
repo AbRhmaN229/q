@@ -1,16 +1,17 @@
 # Configuration
 
-**q** uses [cosmiconfig](https://github.com/cosmiconfig/cosmiconfig) for configuration discovery.
+**q** uses [c12](https://github.com/unjs/c12) for configuration discovery, with support for
+TypeScript configs.
 
 ## Config File Locations
 
-Configuration is searched in the following order:
+Configuration is searched in the following order (first found wins):
 
-1. `q` property in `package.json`
-2. `.qrc` (JSON or YAML)
-3. `.qrc.json`, `.qrc.yaml`, `.qrc.yml`
-4. `q.config.js`, `q.config.mjs`
-5. `~/.config/q/config.yaml` (global)
+1. `q.config.ts`, `q.config.js`, `q.config.mjs`, `q.config.cjs`
+2. `.config/q.ts`, `.config/q.js` (project-level)
+3. `.qrc` (JSON format)
+4. `package.json` with `"q"` key
+5. `~/.config/q/` (user-level global config)
 
 ## Example Configuration
 
@@ -55,7 +56,8 @@ safety:
 
 ## Project Context
 
-Create a `.q/context.md` file in your project root to add project-specific context that gets automatically included in every query. This is useful for:
+Create a `.q/context.md` file in your project root to add project-specific context that gets
+automatically included in every query. This is useful for:
 
 - Project conventions and coding standards
 - Architecture notes
@@ -64,6 +66,7 @@ Create a `.q/context.md` file in your project root to add project-specific conte
 
 ```markdown
 <!-- .q/context.md -->
+
 # My Project
 
 - This is a TypeScript + React project
@@ -73,6 +76,7 @@ Create a `.q/context.md` file in your project root to add project-specific conte
 ```
 
 The context file is searched in this order:
+
 1. `.q/context.md`
 2. `.q/CONTEXT.md`
 3. `CONTEXT.md`
@@ -81,7 +85,8 @@ The context file is searched in this order:
 
 ### Code Execution in Config Files
 
-JavaScript config files (`q.config.js`, `q.config.mjs`, `q.config.ts`) are **executed** when loaded. This is a feature that enables dynamic configuration, but has security implications:
+JavaScript config files (`q.config.js`, `q.config.mjs`, `q.config.ts`) are **executed** when loaded.
+This is a feature that enables dynamic configuration, but has security implications:
 
 - Only use config files you trust
 - Be cautious running `q` in untrusted directories that may contain malicious config files

@@ -1,69 +1,167 @@
 # Shell Integration
 
-Enable hotkey support and enhanced context by adding **q** to your shell configuration.
+Enable hotkey support, context capture, and convenient shortcuts by integrating **q** into your
+shell.
 
-## Zsh Integration
+## Quick Setup
 
-Add to your `~/.zshrc`:
+The recommended approach uses q's built-in shell scripts:
 
-```bash
-# q - Quick Claude queries
-# Ctrl+Q opens interactive mode
-bindkey -s '^Q' 'q\n'
+::: code-group
 
-# Include last command output in context
-q-with-context() {
-  local last_output=$(fc -ln -1 | head -1)
-  q "$@"
-}
-alias qc='q-with-context'
+```bash [Zsh (~/.zshrc)]
+eval "$(q --shell-init zsh)"
 ```
 
-## Bash Integration
+```bash [Bash (~/.bashrc)]
+eval "$(q --shell-init bash)"
+```
 
-Add to your `~/.bashrc`:
+```fish [Fish (~/.config/fish/config.fish)]
+q --shell-init fish | source
+```
+
+:::
+
+After adding, restart your terminal or source the config file.
+
+::: tip Suppress Init Message Set `Q_QUIET=1` in your environment to hide the startup message. :::
+
+## Provided Commands
+
+The shell integration provides these commands:
+
+| Command | Description                                                                   |
+| ------- | ----------------------------------------------------------------------------- |
+| `qq`    | Quick query — opens interactive mode if no arguments                          |
+| `qctx`  | Query with context — includes working directory, git status, and last command |
+| `qerr`  | Explain last error — only activates if the previous command failed            |
+| `qx`    | Execute mode — shortcut for `q -x`                                            |
+| `qr`    | Resume session — shortcut for `q -r last`                                     |
+
+### Examples
 
 ```bash
-# q - Quick Claude queries
-# Ctrl+Q opens interactive mode
+# Quick query
+qq "what does this regex do"
+
+# Interactive mode
+qq
+
+# Query with full context
+qctx "why did my build fail"
+
+# After a failed command
+npm test          # exits with error
+qerr              # explains the error automatically
+
+# Execute mode
+qx "find TODO comments in src/"
+
+# Resume last conversation
+qr "and what about the other issue?"
+```
+
+## Hotkey: Ctrl+Q
+
+The shell integration binds `Ctrl+Q` for quick access:
+
+| Scenario             | Behavior                           |
+| -------------------- | ---------------------------------- |
+| Empty command line   | Inserts `qq ` ready for your query |
+| Text on command line | Runs `q "your text"` immediately   |
+
+This lets you quickly ask questions without disrupting your workflow.
+
+::: info Flow Control The integration disables terminal flow control (`stty -ixon`) to free up
+`Ctrl+Q`, which is traditionally used for XON/XOFF. :::
+
+## Context Capture
+
+The shell integration tracks your command history:
+
+- **Last command**: What you ran and its exit status
+- **Git context**: Current branch and dirty/clean state
+- **Working directory**: Where you're running from
+
+The `qctx` and `qerr` commands use this context automatically.
+
+### How It Works
+
+```bash
+# You run a failing command
+npm run build
+
+# Then ask for help - context is included automatically
+qerr
+
+# This sends q a prompt like:
+# ─── Context ───
+# Directory: /Users/you/project
+# Git: feature-branch (dirty)
+#
+# ⚠ Command failed with exit code 1
+# Command: npm run build
+# ────────────────
+#
+# Explain this error and suggest how to fix it
+```
+
+## Tab Completion
+
+The integration includes completions for all q commands and their options. Type `q -` and press Tab
+to see available flags.
+
+## Manual Configuration
+
+If you prefer manual setup or want to customize behavior:
+
+### Zsh
+
+```bash
+# Basic hotkey
+bindkey -s '^Q' 'q\n'
+
+# Query with last command
+q-last() {
+  local last=$(fc -ln -1)
+  q "Context: ran '$last'\n\n$*"
+}
+```
+
+### Bash
+
+```bash
+# Basic hotkey
 bind '"\C-q":"q\n"'
 ```
 
-## Fish Integration
-
-Add to your `~/.config/fish/config.fish`:
+### Fish
 
 ```fish
-# q - Quick Claude queries
+# Basic hotkey
 bind \cq 'q; commandline -f repaint'
 ```
 
-## Last Command Context
+## Git Shortcuts
 
-Capture the output of your last command to include as context:
-
-```bash
-# Run a command and pipe its output
-some-command 2>&1 | q "what went wrong"
-
-# Or use a helper function
-qlast() {
-  local output=$(eval "$(fc -ln -1)" 2>&1)
-  echo "$output" | q "$@"
-}
-```
-
-## Git Aliases
-
-Add helpful git-related aliases:
+Add these aliases for common git workflows:
 
 ```bash
-# Explain current diff
+# Explain current changes
 alias qd='git diff | q "explain these changes"'
 
 # Review staged changes
-alias qr='git diff --staged | q "review this code"'
+alias qrev='git diff --staged | q "review this code for issues"'
 
 # Generate commit message
-alias qc='git diff --staged | q "write a commit message"'
+alias qcommit='git diff --staged | q "@commit"'
 ```
+
+## Environment Variables
+
+| Variable            | Description                                 |
+| ------------------- | ------------------------------------------- |
+| `Q_QUIET`           | Suppress the shell integration init message |
+| `ANTHROPIC_API_KEY` | Your API key (required)                     |
+| `NO_COLOR`          | Disable colors when set                     |

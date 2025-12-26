@@ -30,6 +30,7 @@ interface Config {
   safety: {
     confirmDestructive: boolean; // Confirm dangerous commands
     maxCostPerQuery: number; // USD limit per query
+    maxInputSize: number; // Max input size in characters
     blockedCommands: string[]; // Patterns to never execute
   };
 }
@@ -52,6 +53,7 @@ prompts: {}
 safety:
   confirmDestructive: true
   maxCostPerQuery: 0.50
+  maxInputSize: 100000
   blockedCommands: []
 ```
 
@@ -119,6 +121,16 @@ patterns (rm, drop, delete, etc.).
 ### safety.maxCostPerQuery
 
 Maximum cost in USD allowed per query. Queries exceeding this will be stopped.
+
+### safety.maxInputSize
+
+Maximum input size in characters (default: 100,000 or ~100KB). This limits the size of piped input
+or file contents to prevent excessive token usage and costs.
+
+```yaml
+safety:
+  maxInputSize: 200000 # Increase to 200KB for large files
+```
 
 ### safety.blockedCommands
 

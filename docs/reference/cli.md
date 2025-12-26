@@ -14,24 +14,40 @@ q [query] [options]
 
 ## Options
 
-| Option            | Alias | Description                                        |
-| ----------------- | ----- | -------------------------------------------------- |
-| `--interactive`   | `-i`  | Open interactive TUI mode                          |
-| `--execute`       | `-x`  | Enable agent tools (Read, Glob, Grep, Bash)        |
-| `--dry-run`       |       | Show tools without executing (use with `-x`)       |
-| `--resume <id>`   | `-r`  | Resume a previous session ("last" for most recent) |
-| `--continue`      | `-c`  | Continue last session (shortcut for `-r last`)     |
-| `--model <model>` | `-m`  | Model to use: sonnet, opus, haiku                  |
-| `--file <path>`   | `-f`  | Include file(s) as context (can be repeated)       |
-| `--quiet`         | `-q`  | Minimal output (response only)                     |
-| `--verbose`       | `-v`  | Show token/cost stats                              |
-| `--raw`           |       | Raw output without markdown formatting             |
-| `--json`          |       | Output response as JSON                            |
-| `--sessions`      |       | List recent sessions                               |
-| `--no-config`     |       | Skip loading config files (security)               |
-| `--color <mode>`  |       | Color mode: auto, always, never                    |
-| `--version`       |       | Show version number                                |
-| `--help`          |       | Show help                                          |
+| Option            | Alias | Description                                                    |
+| ----------------- | ----- | -------------------------------------------------------------- |
+| `--interactive`   | `-i`  | Open interactive TUI mode                                      |
+| `--execute`       | `-x`  | Enable agent tools (Read, Glob, Grep, Bash, Write, Edit)       |
+| `--dry-run`       |       | Show tools without executing (use with `-x`)                   |
+| `--resume <id>`   | `-r`  | Resume a previous session ("last" for most recent)             |
+| `--continue`      | `-c`  | Continue last session (shortcut for `-r last`)                 |
+| `--model <model>` | `-m`  | Model to use: sonnet, opus, haiku                              |
+| `--file <path>`   | `-f`  | Include file(s) as context (can be repeated)                   |
+| `--quiet`         | `-q`  | Minimal output (response only)                                 |
+| `--verbose`       | `-v`  | Show token/cost stats                                          |
+| `--stream`        | `-s`  | Enable streaming (default: true, use `--no-stream` to disable) |
+| `--raw`           |       | Raw output without markdown formatting                         |
+| `--json`          |       | Output response as JSON                                        |
+| `--sessions`      |       | List recent sessions                                           |
+| `--no-config`     |       | Skip loading config files (security)                           |
+| `--color <mode>`  |       | Color mode: auto, always, never                                |
+| `--shell-init`    |       | Output shell integration script (bash, zsh, fish)              |
+| `--version`       |       | Show version number                                            |
+| `--help`          |       | Show help                                                      |
+
+## Shell Integration
+
+Output shell integration scripts for your shell:
+
+```bash
+# Add to your shell config
+eval "$(q --shell-init zsh)"   # For Zsh
+eval "$(q --shell-init bash)"  # For Bash
+q --shell-init fish | source   # For Fish
+```
+
+This provides commands like `qq`, `qctx`, `qerr`, `qx`, `qr` and the `Ctrl+Q` hotkey. See
+[Shell Integration](/guide/shell-integration) for details.
 
 ## Examples
 
@@ -50,6 +66,9 @@ git diff | q "summarize these changes"
 pbpaste | q "review this code"
 ```
 
+::: tip Pipe Mode Behavior When stdout is piped, q automatically enables `--quiet`, `--raw`, and
+`--color never` for clean machine-readable output. :::
+
 ### Interactive Mode
 
 ```bash
@@ -63,6 +82,9 @@ q -i       # Explicit flag
 q -x "find all TODO comments"
 q --execute "run tests and fix failures"
 ```
+
+::: info Tool Availability Execute mode enables: **Read**, **Glob**, **Grep** (auto-approved), plus
+**Bash**, **Write**, **Edit** (require approval). :::
 
 ### Resume Session
 
@@ -88,16 +110,18 @@ q -f src/*.ts "review these files"
 ### Output Formats
 
 ```bash
-q --json "query"     # JSON output
-q --raw "query"      # No markdown formatting
-q -q "query"         # Minimal output
+q --json "query"       # JSON output
+q --raw "query"        # No markdown formatting
+q -q "query"           # Minimal output
+q --no-stream "query"  # Wait for complete response
 ```
 
 ### Model Selection
 
 ```bash
-q -m opus "complex question"
-q -m haiku "quick question"
+q -m opus "complex question"    # Most capable
+q -m sonnet "general question"  # Balanced (default)
+q -m haiku "quick question"     # Fastest, cheapest
 ```
 
 ## Exit Codes
@@ -107,3 +131,12 @@ q -m haiku "quick question"
 | 0    | Success                               |
 | 1    | Error (invalid args, API error, etc.) |
 | 130  | Interrupted (Ctrl+C)                  |
+
+## Environment Variables
+
+| Variable            | Description                             |
+| ------------------- | --------------------------------------- |
+| `ANTHROPIC_API_KEY` | Your Anthropic API key (required)       |
+| `NO_COLOR`          | Disable colors when set to any value    |
+| `DEBUG`             | Enable debug output when set to `1`     |
+| `Q_QUIET`           | Suppress shell integration init message |
