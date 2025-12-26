@@ -35,5 +35,15 @@ jobs:
       - name: '▲ Build'
         run: bun run build
 
-      - name: '● Quality checks'
-        run: bun run check
+      - name: '● Type check & lint'
+        run: bun run typecheck && bun run lint:all
+
+      - name: '◉ Tests with coverage'
+        run: bun run test:coverage
+
+      - name: '↑ Upload coverage'
+        uses: codecov/codecov-action@v5
+        with:
+          files: ./coverage/lcov.info
+          fail_ci_if_error: false
+          verbose: true

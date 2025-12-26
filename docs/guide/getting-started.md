@@ -27,6 +27,16 @@ bun run build
 bun link
 ```
 
+### Compiled Binary
+
+You can also compile q to a standalone binary:
+
+```bash
+bun run build:compile
+```
+
+This creates a native binary, but note that some dependencies (shiki for syntax highlighting, Claude Agent SDK) are external and require `node_modules` to be present. For fully portable deployment, use the npm/bun package installation methods.
+
 ## Prerequisites
 
 1. **Bun 1.1+** or Node.js 20+

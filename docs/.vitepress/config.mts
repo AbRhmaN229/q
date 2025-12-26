@@ -35,6 +35,10 @@ export default defineConfig({
             { text: 'Shell Integration', link: '/guide/shell-integration' },
           ],
         },
+        {
+          text: 'Help',
+          items: [{ text: 'Troubleshooting', link: '/guide/troubleshooting' }],
+        },
       ],
       '/reference/': [
         {
@@ -51,11 +55,18 @@ export default defineConfig({
 
     footer: {
       message: 'Released under the Apache-2.0 License.',
-      copyright: 'Copyright © 2024 hyperb1iss',
+      copyright: 'Copyright © 2025 Stefanie Jane',
     },
 
     search: {
       provider: 'local',
+    },
+  },
+
+  markdown: {
+    theme: {
+      light: 'github-light',
+      dark: 'one-dark-pro',
     },
   },
 });
