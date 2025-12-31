@@ -1,6 +1,6 @@
 {
   "name": "@hyperb1iss/q",
-  "version": "0.9.1",
+  "version": "0.9.2",
   "description": "The tiniest Claude Code CLI — ask, pipe, chat",
   "type": "module",
   "main": "dist/cli.js",
