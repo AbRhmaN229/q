@@ -1,3 +1,18 @@
+## [0.9.3] - 2025-12-31
+
+Minor CLI improvement for file flag handling.
+
+### Fixed
+
+- fix(cli): improve `-f` flag behavior for multiple files - Add `nargs: 1` to require explicit value per `-f` flag and update help text to clarify usage, preventing ambiguous argument parsing when using multiple file flags (1d8bbe9)
+
+### Metrics
+
+- Total Commits: 1
+- Files Changed: 1
+- Insertions: +4
+- Deletions: -2
+
 ## [0.9.2] - 2025-12-31
 
 This release enhances automation, extends file handling capabilities, and improves documentation infrastructure. The highlight is automated changelog generation via git-iris, along with new CLI options for session management and dry-run testing.
